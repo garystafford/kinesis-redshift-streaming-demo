@@ -66,6 +66,8 @@ aws cloudformation delete-stack --stack-name kinesis-firehose-stack
 aws cloudformation delete-stack --stack-name redshift-stack
 ```
 
+## References
+
 https://docs.aws.amazon.com/firehose/latest/dev/controlling-access.html#using-iam-rs
 https://docs.aws.amazon.com/redshift/latest/gsg/rs-gsg-create-sample-db.html
 https://noise.getoto.net/tag/aws-lake-formation/
