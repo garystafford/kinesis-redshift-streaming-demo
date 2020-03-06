@@ -6,16 +6,19 @@ Project files for the accompanying post, [Streaming Data Analytics with Amazon K
 
 ```bash
 export AWS_DEFAULT_REGION=us-east-1
-export REDSHIFT_PASSWORD=5up3r53cr3tPa55w0rd
+REDSHIFT_USERNAME=awsuser
+REDSHIFT_PASSWORD=5up3r53cr3tPa55w0rd
 
 # Create resources
 aws cloudformation create-stack \
     --stack-name redshift-stack \
     --template-body file://cloudformation/redshift.yml \
-    --parameters ParameterKey=MasterUserPassword,ParameterValue=${REDSHIFT_PASSWORD} \
+    --parameters ParameterKey=MasterUsername,ParameterValue=${REDSHIFT_USERNAME} \
+                 ParameterKey=MasterUserPassword,ParameterValue=${REDSHIFT_PASSWORD} \
                  ParameterKey=InboundTraffic,ParameterValue=$(curl ifconfig.me -s)/32 \
     --capabilities CAPABILITY_NAMED_IAM
 
+# Wait for first stack to complete
 aws cloudformation create-stack \
     --stack-name kinesis-firehose-stack \
     --template-body file://cloudformation/kinesis-firehose.yml \
@@ -55,7 +58,7 @@ nohup python3 ./scripts/kinesis_put_streaming_data.py > output.log &
 
 ps -aux | grep kinesis
 
-# Delete resources
+# Delete demonstration resources
 aws s3 rm s3://${DATA_BUCKET} --recursive
 aws s3 rm s3://${LOG_BUCKET} --recursive
 

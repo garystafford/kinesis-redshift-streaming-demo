@@ -1,9 +1,9 @@
--- Create schema in Redshift DB
+-- Create new schema in Redshift DB
 DROP SCHEMA IF EXISTS sensor CASCADE;
 CREATE SCHEMA sensor;
 SET search_path = sensor;
 
--- Create tables in Redshift DB
+-- Create (6) tables in Redshift DB
 CREATE TABLE message -- streaming data table
 (
     id      BIGINT IDENTITY (1, 1),                                   -- message id
@@ -61,34 +61,35 @@ CREATE TABLE sensors -- fact table
 );
 
 -- Copy sample data to tables from S3
+-- ** MUST FIRST CHANGE your_bucket_name and cluster_permissions_role_arn **
 TRUNCATE TABLE history;
 COPY history (id, serviced, action, technician_id, notes)
-    FROM 's3://redshift-stack-databucket-your_bucket/history/'
-    CREDENTIALS 'aws_iam_role=arn:aws:iam::your_account:role/ClusterPermissionsRole'
+    FROM 's3://your_bucket_name/history/'
+    CREDENTIALS 'aws_iam_role=cluster_permissions_role_arn'
     CSV IGNOREHEADER 1;
 
 TRUNCATE TABLE location;
 COPY location (id, long, lat, description)
-    FROM 's3://redshift-stack-databucket-your_bucket/location/'
-    CREDENTIALS 'aws_iam_role=arn:aws:iam::your_account:role/ClusterPermissionsRole'
+    FROM 's3://your_bucket_name/location/'
+    CREDENTIALS 'aws_iam_role=cluster_permissions_role_arn'
     CSV IGNOREHEADER 1;
 
 TRUNCATE TABLE sensor;
 COPY sensor (id, guid, mac, sku, upc, active, notes)
-    FROM 's3://redshift-stack-databucket-your_bucket/sensor/'
-    CREDENTIALS 'aws_iam_role=arn:aws:iam::your_account:role/ClusterPermissionsRole'
+    FROM 's3://your_bucket_name/sensor/'
+    CREDENTIALS 'aws_iam_role=cluster_permissions_role_arn'
     CSV IGNOREHEADER 1;
 
 TRUNCATE TABLE manufacturer;
 COPY manufacturer (id, name, website, notes)
-    FROM 's3://redshift-stack-databucket-your_bucket/manufacturer/'
-    CREDENTIALS 'aws_iam_role=arn:aws:iam::your_account:role/ClusterPermissionsRole'
+    FROM 's3://your_bucket_name/manufacturer/'
+    CREDENTIALS 'aws_iam_role=cluster_permissions_role_arn'
     CSV IGNOREHEADER 1;
 
 TRUNCATE TABLE sensors;
 COPY sensors (sensor_id, manufacturer_id, location_id, history_id, guid)
-    FROM 's3://redshift-stack-databucket-your_bucket/sensors/'
-    CREDENTIALS 'aws_iam_role=arn:aws:iam::your_account:role/ClusterPermissionsRole'
+    FROM 's3://your_bucket_name/sensors/'
+    CREDENTIALS 'aws_iam_role=cluster_permissions_role_arn'
     CSV IGNOREHEADER 1;
 
 SELECT COUNT(*) FROM history; -- 30
