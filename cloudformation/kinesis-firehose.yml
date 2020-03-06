@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Kinesis Firehose stack for Redshift/Kinesis Demo."
+Parameters:
+  RedshiftStackName:
+    Type: String
+    Description: The name of Redshift CloudFormation Stack we import values from.
+    Default: "redshift-stack"
+  DeliveryStreamName:
+    Type: String
+    Description: The name of the Kinesis Firehose Delivery Stream.
+    Default: "redshift-delivery-stream"
+  MasterUserPassword:
+    Description: The password that is associated with the master user account for
+      the cluster that is being created.
+    Type: String
+    NoEcho: "true"
+Resources:
+  DeliveryStream:
+    DependsOn:
+      - DeliveryPolicy
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Ref DeliveryStreamName
+      RedshiftDestinationConfiguration:
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref KinesisLogGroup
+          LogStreamName: !Ref RedshiftLogStream
+        ClusterJDBCURL:
+          Fn::ImportValue: !Join [ "-", [ !Ref "RedshiftStackName", "ClusterJDBCURL" ] ]
+        CopyCommand:
+          CopyOptions: "JSON 'auto' GZIP"
+          DataTableColumns: "guid,ts,value"
+          DataTableName: "sensor.message"
+        Password: !Ref MasterUserPassword
+        RoleARN: !GetAtt DeliveryRole.Arn
+        S3Configuration:
+          BucketARN:
+            Fn::ImportValue: !Join [ "-", [ !Ref "RedshiftStackName", "DataBucketArn" ] ]
+          CompressionFormat: "GZIP"
+          BufferingHints:
+            IntervalInSeconds: 60
+            SizeInMBs: 1
+          CloudWatchLoggingOptions:
+            Enabled: true
+            LogGroupName: !Ref KinesisLogGroup
+            LogStreamName: !Ref S3LogStream
+          Prefix: "message/"
+          RoleARN: !GetAtt DeliveryRole.Arn
+        Username:
+          Fn::ImportValue: !Join [ "-", [ !Ref "RedshiftStackName", "MasterUsername" ] ]
+  DeliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: FirehoseDeliveryRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ""
+            Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                "sts:ExternalId": !Ref "AWS::AccountId"
+  DeliveryPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: FirehoseDeliveryPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "s3:AbortMultipartUpload"
+              - "s3:GetBucketLocation"
+              - "s3:GetObject"
+              - "s3:ListBucket"
+              - "s3:ListBucketMultipartUploads"
+              - "s3:PutObject"
+            Resource:
+              - Fn::ImportValue: !Join [ "-", [ !Ref "RedshiftStackName", "DataBucketArn" ] ]
+              - !Sub
+                - ${ValueFromBaseStack}/*
+                - ValueFromBaseStack:
+                    Fn::ImportValue: !Join [ "-", [ !Ref "RedshiftStackName", "DataBucketArn" ] ]
+      Roles:
+        - !Ref DeliveryRole
+  KinesisLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/kinesisfirehose/${DeliveryStreamName}"
+      RetentionInDays: 7
+  RedshiftLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref KinesisLogGroup
+      LogStreamName: "RedshiftDelivery"
+  S3LogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref KinesisLogGroup
+      LogStreamName: "S3Delivery"
+Outputs:
+  DeliveryStreamName:
+    Description: Name of the Kinesis Firehose delivery stream
+    Value:
+      Ref: DeliveryStream
