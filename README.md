@@ -1,6 +1,6 @@
 # Streaming Data Analytics with Amazon Kinesis Data Firehose, Redshift, and QuickSight
 
-Project files for the accompanying post, [Streaming Data Analytics with Amazon Kinesis Data Firehose, Redshift, and QuickSight](https://wp.me/p1RD28-6W1).
+Project files for the accompanying post, [Streaming Data Analytics with Amazon Kinesis Data Firehose, Redshift, and QuickSight](https://tinyurl.com/streamingwarehouse).
 
 ## Commands
 
