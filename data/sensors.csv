@@ -1,4 +1,4 @@
-﻿sensor_id,manufacturer_id,location_id,history_id,guid
+﻿sensor_id,manufacturer_id,location_id,history_id,message_guid
 1,1,1,1,"03e39872-e105-4be4-83c0-9ade818465dc"
 1,1,1,2,"03e39872-e105-4be4-83c0-9ade818465dc"
 1,1,1,3,"03e39872-e105-4be4-83c0-9ade818465dc"

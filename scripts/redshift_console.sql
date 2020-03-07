@@ -57,7 +57,7 @@ CREATE TABLE sensors -- fact table
     manufacturer_id INTEGER     NOT NULL,                   -- manufacturer id
     location_id     INTEGER     NOT NULL,                   -- location id
     history_id      BIGINT      NOT NULL,                   -- history id
-    guid            VARCHAR(36) NOT NULL                    -- device guid
+    message_guid    VARCHAR(36) NOT NULL                    -- sensor guid
 );
 
 -- Copy sample data to tables from S3
@@ -87,7 +87,7 @@ COPY manufacturer (id, name, website, notes)
     CSV IGNOREHEADER 1;
 
 TRUNCATE TABLE sensors;
-COPY sensors (sensor_id, manufacturer_id, location_id, history_id, guid)
+COPY sensors (sensor_id, manufacturer_id, location_id, history_id, message_guid)
     FROM 's3://your_bucket_name/sensors/'
     CREDENTIALS 'aws_iam_role=cluster_permissions_role_arn'
     CSV IGNOREHEADER 1;
@@ -119,7 +119,7 @@ FROM sensors f
          INNER JOIN history h ON (f.history_id = h.id)
          INNER JOIN location l ON (f.location_id = l.id)
          INNER JOIN manufacturer m ON (f.manufacturer_id = m.id)
-         INNER JOIN message e ON (f.guid = e.guid)
+         INNER JOIN message e ON (f.message_guid = e.guid)
 WHERE s.active IS TRUE
   AND h.action = 'INSTALLED'
 ORDER BY f.id;
@@ -136,7 +136,7 @@ FROM sensors f
          INNER JOIN sensor s ON (f.sensor_id = s.id)
          INNER JOIN history h ON (f.history_id = h.id)
          INNER JOIN location l ON (f.location_id = l.id)
-         INNER JOIN message e ON (f.guid = e.guid)
+         INNER JOIN message e ON (f.message_guid = e.guid)
 WHERE s.active IS TRUE
   AND h.action = 'INSTALLED'
 GROUP BY s.guid, l.description, l.lat, l.long
@@ -154,7 +154,7 @@ FROM sensors f
          INNER JOIN sensor s ON (f.sensor_id = s.id)
          INNER JOIN history h ON (f.history_id = h.id)
          INNER JOIN location l ON (f.location_id = l.id)
-         INNER JOIN message e ON (f.guid = e.guid)
+         INNER JOIN message e ON (f.message_guid = e.guid)
 WHERE s.active IS TRUE
   AND h.action = 'INSTALLED'
 GROUP BY s.guid, l.description, l.lat, l.long
@@ -176,7 +176,7 @@ FROM sensors f
                             guid,
                             temp
                      FROM message
-                     WHERE DATEDIFF(minute, recorded_time, GETDATE()) <= 30) e ON (f.guid = e.guid)
+                     WHERE DATEDIFF(minute, recorded_time, GETDATE()) <= 30) e ON (f.message_guid = e.guid)
 WHERE s.active IS TRUE
   AND h.action = 'INSTALLED'
 GROUP BY s.guid, l.description, l.lat, l.long
