@@ -45,7 +45,7 @@ python3 -m pip install -r scripts/requirements.txt --upgrade
 
 python3 ./scripts/kinesis_put_test_msg.py
 
-# Running on EC2
+# Running script on EC2
 yes | sudo yum update
 yes | sudo yum install python3 git htop
 python3 --version
@@ -53,6 +53,7 @@ git clone git clone git@github.com:garystafford/kinesis-redshift-streaming-demo.
 python3 -m pip install --user --upgrade pip
 python3 -m pip install -r scripts/requirements.txt --upgrade
 
+# Run script as background process
 export AWS_DEFAULT_REGION=us-east-1
 nohup python3 ./scripts/kinesis_put_streaming_data.py > output.log &
 
