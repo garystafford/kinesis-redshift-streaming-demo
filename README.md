@@ -60,6 +60,20 @@ nohup python3 ./scripts/kinesis_put_streaming_data.py > output.log &
 ps -aux | grep kinesis
 
 # Delete demonstration resources
+# Get data bucket name
+export DATA_BUCKET=$(aws cloudformation describe-stacks \
+    --stack-name redshift-stack \
+    | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "DataBucket") | .OutputValue')
+
+echo ${DATA_BUCKET}
+
+# Get log bucket name
+export LOG_BUCKET=$(aws cloudformation describe-stacks \
+    --stack-name redshift-stack \
+    | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "LogBucket") | .OutputValue')
+
+echo ${LOG_BUCKET}
+
 aws s3 rm s3://${DATA_BUCKET} --recursive
 aws s3 rm s3://${LOG_BUCKET} --recursive
 
@@ -67,6 +81,8 @@ aws s3 rm s3://${DATA_BUCKET}
 aws s3 rm s3://${LOG_BUCKET}
 
 aws cloudformation delete-stack --stack-name kinesis-firehose-stack
+
+# Wait for first stack to be deleted
 aws cloudformation delete-stack --stack-name redshift-stack
 ```
 
