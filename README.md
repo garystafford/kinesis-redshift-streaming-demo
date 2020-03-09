@@ -58,27 +58,27 @@ export AWS_DEFAULT_REGION=us-east-1
 nohup python3 ./scripts/kinesis_put_streaming_data.py > output.log &
 
 ps -aux | grep kinesis
+```
 
-# Delete demonstration resources
+## Cleaning Up
+
+```bash
 # Get data bucket name
-export DATA_BUCKET=$(aws cloudformation describe-stacks \
+DATA_BUCKET=$(aws cloudformation describe-stacks \
     --stack-name redshift-stack \
     | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "DataBucket") | .OutputValue')
 
 echo ${DATA_BUCKET}
 
 # Get log bucket name
-export LOG_BUCKET=$(aws cloudformation describe-stacks \
+LOG_BUCKET=$(aws cloudformation describe-stacks \
     --stack-name redshift-stack \
     | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "LogBucket") | .OutputValue')
 
 echo ${LOG_BUCKET}
 
-aws s3 rm s3://${DATA_BUCKET} --recursive
-aws s3 rm s3://${LOG_BUCKET} --recursive
-
-aws s3 rm s3://${DATA_BUCKET}
-aws s3 rm s3://${LOG_BUCKET}
+# Delete demonstration resources
+python3 ./scripts/delete_buckets.py
 
 aws cloudformation delete-stack --stack-name kinesis-firehose-stack
 
