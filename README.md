@@ -2,7 +2,7 @@
 
 Project files for the accompanying post, [Streaming Data Analytics with Amazon Kinesis Data Firehose, Redshift, and QuickSight](https://tinyurl.com/streamingwarehouse).
 
-## Commands
+## Setup Commands
 
 ```bash
 export AWS_DEFAULT_REGION=us-east-1
@@ -26,7 +26,7 @@ aws cloudformation create-stack \
     --capabilities CAPABILITY_NAMED_IAM
 
 # Get data bucket name
-DATA_BUCKET=$(aws cloudformation describe-stacks \
+export DATA_BUCKET=$(aws cloudformation describe-stacks \
     --stack-name redshift-stack \
     | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "DataBucket") | .OutputValue')
 
@@ -45,7 +45,12 @@ python3 -m pip install -r scripts/requirements.txt --upgrade
 
 python3 ./scripts/kinesis_put_test_msg.py
 
-# Running script on EC2
+python3 ./scripts/kinesis_put_streaming_data.py
+```
+
+## Long Running Script on EC2 Instance
+
+```bash
 yes | sudo yum update
 yes | sudo yum install python3 git htop
 python3 --version
@@ -64,14 +69,14 @@ ps -aux | grep kinesis
 
 ```bash
 # Get data bucket name
-DATA_BUCKET=$(aws cloudformation describe-stacks \
+export DATA_BUCKET=$(aws cloudformation describe-stacks \
     --stack-name redshift-stack \
     | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "DataBucket") | .OutputValue')
 
 echo ${DATA_BUCKET}
 
 # Get log bucket name
-LOG_BUCKET=$(aws cloudformation describe-stacks \
+export LOG_BUCKET=$(aws cloudformation describe-stacks \
     --stack-name redshift-stack \
     | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "LogBucket") | .OutputValue')
 
@@ -88,7 +93,7 @@ aws cloudformation delete-stack --stack-name redshift-stack
 
 ## References
 
-https://docs.aws.amazon.com/firehose/latest/dev/controlling-access.html#using-iam-rs
-https://docs.aws.amazon.com/redshift/latest/gsg/rs-gsg-create-sample-db.html
-https://noise.getoto.net/tag/aws-lake-formation/
-https://www.tutorialspoint.com/dwh/dwh_schemas.htm
+<https://docs.aws.amazon.com/firehose/latest/dev/controlling-access.html#using-iam-rs>
+<https://docs.aws.amazon.com/redshift/latest/gsg/rs-gsg-create-sample-db.html>
+<https://noise.getoto.net/tag/aws-lake-formation/>
+<https://www.tutorialspoint.com/dwh/dwh_schemas.htm>
