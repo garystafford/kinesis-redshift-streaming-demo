@@ -30,7 +30,7 @@ Resources:
           Fn::ImportValue: !Join [ "-", [ !Ref "RedshiftStackName", "ClusterJDBCURL" ] ]
         CopyCommand:
           CopyOptions: "JSON 'auto' GZIP"
-          DataTableColumns: "guid,ts,value"
+          DataTableColumns: "guid,ts,temp"
           DataTableName: "sensor.message"
         Password: !Ref MasterUserPassword
         RoleARN: !GetAtt DeliveryRole.Arn
