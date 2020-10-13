@@ -146,6 +146,7 @@ ORDER BY msg_count, s.guid;
 DROP VIEW IF EXISTS sensor_avg_temp;
 CREATE OR REPLACE VIEW sensor_avg_temp AS
 SELECT avg(e.temp)   AS avg_temp,
+       count(s.guid) AS msg_count,
        s.guid,
        l.lat,
        l.long,
@@ -164,6 +165,7 @@ ORDER BY avg_temp, s.guid;
 DROP VIEW IF EXISTS sensor_avg_temp_current;
 CREATE OR REPLACE VIEW sensor_avg_temp_current AS
 SELECT avg(e.temp)   AS avg_temp,
+       count(s.guid) AS msg_count,
        s.guid,
        l.lat,
        l.long,
