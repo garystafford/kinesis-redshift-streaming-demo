@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-# Simulated streaming time-series iot sensor data
-# Author: Gary A. Stafford (February 2020)
+# Simulated single IoT message to Kinesis
+# Author: Gary A. Stafford
+# Date: Revised October 2020
 
 import json
 import random
